@@ -5,6 +5,7 @@ import torch
 from PIL import Image
 from torch.utils import data
 from torchvision import transforms as tf
+from tqdm import tqdm
 
 from cityscapes_labels import create_name_to_id, create_id_to_name
 
@@ -147,17 +148,20 @@ class MapillaryVistasDataset(data.Dataset):
 def transform_dataset_split(dataset, split):
     cnt_in = 0
     allclasses = set()
-    for i in range(len(dataset)):
-        img_path, lbl_path, lbl = dataset[i]
-        classes = set(lbl.view(-1).numpy().tolist())
-        if 11 in classes or 12 in classes:
-            shutil.copy(img_path, './vistas-np/test/images/')
-            shutil.copy(lbl_path, './vistas-np/test/labels/')
-        else:
-            shutil.copy(img_path, './vistas-np/' + split + '/images/')
-            shutil.copy(lbl_path, './vistas-np/' + split + '/labels/')
-            cnt_in += 1
-            allclasses.update(classes)
+    with tqdm(total=len(dataset)) as progress_bar:
+        for i in range(len(dataset)):
+            img_path, lbl_path, lbl = dataset[i]
+            classes = torch.unique(lbl.view(-1)).numpy().tolist()
+            if 11 in classes or 12 in classes:
+                shutil.copy(img_path, './vistas-np/test/images/')
+                shutil.copy(lbl_path, './vistas-np/test/labels/')
+            else:
+                shutil.copy(img_path, './vistas-np/' + split + '/images/')
+                shutil.copy(lbl_path, './vistas-np/' + split + '/labels/')
+                cnt_in += 1
+                allclasses.update(classes)
+            progress_bar.update(1)
+
     print(f"Images left in {split} split: {cnt_in}")
 
 
