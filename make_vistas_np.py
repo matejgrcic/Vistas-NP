@@ -77,7 +77,7 @@ class MapillaryVistasDataset(data.Dataset):
         self.split = split
 
         self.images_base = os.path.join(self.root, self.split, 'images')
-        self.annotations_base = os.path.join(self.root, self.split, 'labels')
+        self.annotations_base = os.path.join(self.root, self.split, 'v1.2/labels')
 
         self.files = {}
         self.files[split] = recursive_glob(rootdir=self.images_base, suffix='.jpg')
